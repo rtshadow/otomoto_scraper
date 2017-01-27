@@ -107,6 +107,8 @@ scraper.page(url) do |page|
       end
     end.each(&:join)
 
+    results.sort_by!{ |item| item[6] }
+
     header = %w(Adres Marka Model Rok Silnik Przebieg Cena Kraj Napęd Skrzynia Url)
     "results/#{search_result_page.title.gsub(' ', '_')}_#{Time.now.to_i}.csv".tap do |path|
       CSV.open(path, 'wb') do |csv|
@@ -118,7 +120,7 @@ scraper.page(url) do |page|
       puts "\nDone. Results saved to #{path}"
     end
 
-    format = '%-6s %-5s %-6s %-7s %-10s %-10s %-10s %-30s %-35s %-55s'
+    format = '%-6s %-5s %-6s %-7s %-10s %-10s %-10s %-30s %-35s %-35s'
     print "\n"
     puts format % header[1..10]
     results.each do |line|
