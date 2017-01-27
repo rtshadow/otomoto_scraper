@@ -82,25 +82,23 @@ raise ArgumentError, 'No url' if url.nil?
 scraper = Scraper.new('www.otomoto.pl')
 scraper.page(url) do |page|
   search_result_page = SearchResultPage.new(page)
-  path = "results/#{search_result_page.title.gsub(' ', '_')}_#{Time.now.to_i}.csv"
-  CSV.open(path, 'wb') do |csv|
-    csv << %w(Adres Marka Model Napęd Skrzynia Rocznik Silnik Przebieg Kraj Cena Url)
+  [].tap do |results|
     [].tap do |threads|
       search_result_page.offer_urls.each do |offer_url|
         threads << Thread.new do
           scraper.page(offer_url) do |offer_page|
             offer = OfferPage.new(offer_page)
-            csv << [].tap do |arr|
+            results << [].tap do |arr|
               arr << offer.address
               arr << offer.param('Marka')
               arr << offer.param('Model')
+              arr << offer.param('Rok produkcji')
+              arr << ((offer.param('Pojemność skokowa')&.gsub('cm3', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
+              arr << ((offer.param('Przebieg')&.gsub('km', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
+              arr << (((offer.brutto? ? offer.price : (offer.price * 1.23)).to_i.round(-2).to_f || 0) / 1000)
+              arr << offer.param('Kraj pochodzenia')
               arr << offer.param('Napęd')
               arr << offer.param('Skrzynia biegów')
-              arr << offer.param('Rok produkcji')
-              arr << offer.param('Pojemność skokowa')&.gsub('cm3', '')&.to_i
-              arr << offer.param('Przebieg')&.gsub('km', '')&.to_i
-              arr << offer.param('Kraj pochodzenia')
-              arr << (offer.brutto? ? offer.price : offer.price * 1.23).to_i
               arr << offer_url
               print '.'
             end
@@ -108,6 +106,23 @@ scraper.page(url) do |page|
         end
       end
     end.each(&:join)
-    puts "\nDone. Results saved to #{path}"
+
+    header = %w(Adres Marka Model Rok Silnik Przebieg Cena Kraj Napęd Skrzynia Url)
+    "results/#{search_result_page.title.gsub(' ', '_')}_#{Time.now.to_i}.csv".tap do |path|
+      CSV.open(path, 'wb') do |csv|
+        csv << header
+        results.each do |line|
+          csv << line
+        end
+      end
+      puts "\nDone. Results saved to #{path}"
+    end
+
+    format = '%-6s %-5s %-6s %-7s %-10s %-10s %-10s %-30s %-35s %-55s'
+    print "\n"
+    puts format % header[1..10]
+    results.each do |line|
+      puts format % line[1..10]
+    end
   end
 end
