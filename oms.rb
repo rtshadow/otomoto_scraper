@@ -40,7 +40,7 @@ class OfferPage
     @price ||= page.css('div.offer-price span.offer-price__number').text.gsub('PLN', '').strip.squeeze(' ').gsub(' ', '').to_i
   end
 
-  def brutto?
+  def gross?
     page.css('div.offer-price span.offer-price__details').text.downcase.include?('brutto')
   end
 
@@ -64,10 +64,10 @@ class Scraper
     @host = host
   end
 
-  def page(url)
+  def page(url, page_class)
     uri = URI(url)
     raise ArgumentError, "#{host} is the only supported site" if uri.host != host
-    yield Nokogiri::HTML(open(uri))
+    yield page_class.new(Nokogiri::HTML(open(uri)))
   end
 
   private
@@ -80,26 +80,24 @@ url = ARGV.first
 raise ArgumentError, 'No url' if url.nil?
 
 scraper = Scraper.new('www.otomoto.pl')
-scraper.page(url) do |page|
-  search_result_page = SearchResultPage.new(page)
+scraper.page(url, SearchResultPage) do |search_result_page|
   [].tap do |results|
     [].tap do |threads|
       search_result_page.offer_urls.each do |offer_url|
         threads << Thread.new do
-          scraper.page(offer_url) do |offer_page|
-            offer = OfferPage.new(offer_page)
-            results << [].tap do |arr|
-              arr << offer.address
-              arr << offer.param('Marka')
-              arr << offer.param('Model')
-              arr << offer.param('Rok produkcji')
-              arr << ((offer.param('Pojemność skokowa')&.gsub('cm3', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
-              arr << ((offer.param('Przebieg')&.gsub('km', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
-              arr << (((offer.brutto? ? offer.price : (offer.price * 1.23)).to_i.round(-2).to_f || 0) / 1000)
-              arr << offer.param('Kraj pochodzenia')
-              arr << offer.param('Napęd')
-              arr << offer.param('Skrzynia biegów')
-              arr << offer_url
+          scraper.page(offer_url, OfferPage) do |offer|
+            results << [].tap do |column|
+              column << offer.address
+              column << offer.param('Marka')
+              column << offer.param('Model')
+              column << offer.param('Rok produkcji')
+              column << ((offer.param('Pojemność skokowa')&.gsub('cm3', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
+              column << ((offer.param('Przebieg')&.gsub('km', '')&.to_i&.round(-2)&.to_f || 0) / 1000)
+              column << (((offer.gross? ? offer.price : (offer.price * 1.23)).to_i.round(-2).to_f || 0) / 1000)
+              column << offer.param('Kraj pochodzenia')
+              column << offer.param('Napęd')
+              column << offer.param('Skrzynia biegów')
+              column << offer_url
               print '.'
             end
           end
