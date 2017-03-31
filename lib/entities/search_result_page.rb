@@ -1,9 +1,9 @@
 SearchResultPage = Struct.new(:title, :offer_urls, :url) do
-  def self.from_parser(parser)
+  def self.from_scraper(scraper)
     new(
-      parser.title,
-      parser.offer_urls,
-      parser.url
+      scraper.title,
+      scraper.offer_urls,
+      scraper.url
     ).freeze
   end
 end

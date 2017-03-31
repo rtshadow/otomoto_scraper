@@ -1,26 +1,49 @@
-class OfferPageScraper
-  attr_reader :url
-
-  def initialize(page, url)
-    @page = page
-    @url = url
-  end
-
+class OfferPageScraper < BaseScraper
   def address
     page.css('div.seller-box span.seller-box__seller-address__label').text.strip.split("\n").first.strip.squeeze(' ')
   end
 
   def price_gross
-    gross? ? price : price * 1.23
+    (gross? ? price : price * 1.23)&.to_i&.round(-2)
   end
 
-  def param(param_name, gsub: '')
-    params[param_name]&.gsub(gsub, '')
+  def mark
+    param('Marka')
+  end
+
+  def model
+    param('Model')
+  end
+
+  def year
+    param('Rok produkcji')&.to_i
+  end
+
+  def engine
+    param('Pojemność skokowa', gsub: 'cm3')&.to_i&.round(-2)
+  end
+
+  def run
+    param('Przebieg', gsub: 'km')&.to_i&.round(-2)
+  end
+
+  def country
+    param('Kraj pochodzenia')
+  end
+
+  def drive
+    param('Napęd')
+  end
+
+  def gearbox
+    param('Skrzynia biegów')
   end
 
   private
 
-  attr_reader :page
+  def param(param_name, gsub: '')
+    params[param_name]&.gsub(gsub, '')
+  end
 
   def price
     @price ||= page.css('div.offer-price span.offer-price__number').text.gsub('PLN', '').strip.squeeze(' ').delete(' ').to_i

@@ -1,17 +1,17 @@
 OfferPage = Struct.new(:address, :mark, :model, :year, :engine, :run, :price_gross, :country, :drive, :gearbox, :url) do
-  def self.from_parser(parser)
+  def self.from_scraper(scraper)
     new(
-      parser.address,
-      parser.param('Marka'),
-      parser.param('Model'),
-      parser.param('Rok produkcji')&.to_i,
-      parser.param('Pojemność skokowa', gsub: 'cm3')&.to_i&.round(-2),
-      parser.param('Przebieg', gsub: 'km')&.to_i&.round(-2),
-      parser.price_gross&.to_i&.round(-2),
-      parser.param('Kraj pochodzenia'),
-      parser.param('Napęd'),
-      parser.param('Skrzynia biegów'),
-      parser.url
+      scraper.address,
+      scraper.mark,
+      scraper.model,
+      scraper.year,
+      scraper.engine,
+      scraper.run,
+      scraper.price_gross,
+      scraper.country,
+      scraper.drive,
+      scraper.gearbox,
+      scraper.url
     ).freeze
   end
 end

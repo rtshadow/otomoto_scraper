@@ -9,6 +9,7 @@ require 'open-uri'
 
 require_relative 'lib/entities/offer_page'
 require_relative 'lib/entities/search_result_page'
+require_relative 'lib/scrapers/base_scraper'
 require_relative 'lib/scrapers/offer_page_scraper'
 require_relative 'lib/scrapers/search_result_page_scraper'
 require_relative 'lib/parser'

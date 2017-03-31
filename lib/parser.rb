@@ -1,12 +1,12 @@
 class Parser
-  def initialize(adapter, scraper_class, page_class)
+  def initialize(adapter, scraper_class, entity_class)
     @adapter = adapter
     @scraper_class = scraper_class
-    @page_class = page_class
+    @entity_class = entity_class
   end
 
   def parse(url)
-    page_class.from_parser(build_parser(url))
+    entity_class.from_scraper(build_scraper(url))
   end
 
   def concurrently_parse(urls)
@@ -26,13 +26,9 @@ class Parser
 
   private
 
-  attr_reader :adapter, :scraper_class, :page_class
+  attr_reader :adapter, :scraper_class, :entity_class
 
-  def build_parser(url)
-    scraper_class.new(html(url), url)
-  end
-
-  def html(url)
-    adapter.get_page(url)
+  def build_scraper(url)
+    scraper_class.new(url, adapter)
   end
 end
