@@ -15,6 +15,10 @@ class OfferPageScraper < BaseScraper
     param('Model')
   end
 
+  def equipment
+    page.css('li.offer-features__item').text.strip.gsub("\n", "|").squeeze('   ')
+  end
+
   def year
     param('Rok produkcji')&.to_i
   end

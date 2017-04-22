@@ -22,7 +22,7 @@ raise ArgumentError, 'No url' if url.nil?
 adapter = Adapter.new('www.otomoto.pl')
 offer_parser = Parser.new(adapter, OfferPageScraper, OfferPage)
 search_result_parser = Parser.new(adapter, SearchResultPageScraper, SearchResultPage)
-header = %w(Adres Marka Model Rok Silnik Przebieg Cena Kraj Napęd Skrzynia Url)
+header = %w(Adres Marka Model Rok Silnik Przebieg Cena Kraj Napęd Skrzynia Wyposazenie Url)
 repo = Repo.new(header)
 presenter = Presenter.new(STDOUT, header)
 

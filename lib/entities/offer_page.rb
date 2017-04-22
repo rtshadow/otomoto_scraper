@@ -1,4 +1,4 @@
-OfferPage = Struct.new(:address, :mark, :model, :year, :engine, :run, :price_gross, :country, :drive, :gearbox, :url) do
+OfferPage = Struct.new(:address, :mark, :model, :year, :engine, :run, :price_gross, :country, :drive, :gearbox, :equipment, :url) do
   def self.from_scraper(scraper)
     new(
       scraper.address,
@@ -11,6 +11,7 @@ OfferPage = Struct.new(:address, :mark, :model, :year, :engine, :run, :price_gro
       scraper.country,
       scraper.drive,
       scraper.gearbox,
+      scraper.equipment,
       scraper.url
     ).freeze
   end
